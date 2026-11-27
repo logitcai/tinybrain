@@ -156,7 +156,9 @@ def train(args) -> dict:
                 loss_total = loss.detach() if loss_total is None else loss_total + loss.detach()
             loss_value = loss_total.item()
             if not math.isfinite(loss_value):
-                raise RuntimeError(f"第 {step} 步的损失变成了 {loss_value}，训练停下。上一个存档在 {out / 'ckpt.pt'}")
+                raise RuntimeError(f"第 {step} 步的损失变成了 {loss_value}，训练停下。上一个存档在 {out / 'ckpt.pt'}"
+                                   + ("。如果一开始就是 NaN、而加 --no-compile 正常，多半是编译路径上某个内核没编过（日志里会有成片的 W 开头警告），"
+                                      "见 https://github.com/logitcai/tinybrain/issues/1" if step == 0 and not args.no_compile else ""))
             grad_norm = clip_gradients(model.parameters(), args.clip_grad)
             if graph_step is None:
                 step_optimizers(optimizers)
